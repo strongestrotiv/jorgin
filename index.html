@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canivilu - Tech Chihuahua</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script type="importmap">
+    {
+        "imports": {
+            "react": "https://esm.sh/react@18.2.0",
+            "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+            "lucide-react": "https://esm.sh/lucide-react@0.344.0"
+        }
+    }
+    </script>
+
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body class="bg-slate-950 text-slate-200 m-0 p-0 overflow-hidden">
+    <div id="root"></div>
+
+    <script type="text/babel" data-type="module">
+        import React, { useState, useEffect, useCallback } from 'react';
+        import { createRoot } from 'react-dom/client';
+        import { 
+          Menu, X, ChevronRight, ChevronLeft, Clock, Zap, GraduationCap, 
+          Hammer, CheckCircle, ShieldCheck, BatteryCharging, 
+          Cpu, Wifi, Eye, BookOpen, Ruler, AlertTriangle, Link as LinkIcon
+        } from 'lucide-react';
+
+        function App() {
+          const [currentSlide, setCurrentSlide] = useState(0);
+          const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+          const [isScrolling, setIsScrolling] = useState(false);
+          const [touchStart, setTouchStart] = useState(0);
+
+          const slides = [
+            { id: 'hero', name: 'Início', component: <SectionHero goToPrecos={() => setCurrentSlide(6)} goToSolucao={() => setCurrentSlide(1)} /> },
+            { id: 'problema', name: 'O Problema', component: <SectionProblema /> },
+            { id: 'professores', name: 'Professores', component: <SectionProfessores /> },
+            { id: 'marceneiros', name: 'Marceneiros', component: <SectionMarceneiros /> },
+            { id: 'upgrade', name: 'BrainUpgrade', component: <SectionBrainUpgrade /> },
+            { id: 'specs', name: 'Especificações', component: <SectionSpecs /> },
+            { id: 'precos', name: 'Preços', component: <SectionPrecos /> },
+            { id: 'footer', name: 'Contacto', component: <SectionFooter /> }
+          ];
+
+          const nextSlide = useCallback(() => {
+            if (currentSlide < slides.length - 1) {
+              setCurrentSlide(prev => prev + 1);
+            }
+          }, [currentSlide, slides.length]);
+
+          const prevSlide = useCallback(() => {
+            if (currentSlide > 0) {
+              setCurrentSlide(prev => prev - 1);
+            }
+          }, [currentSlide]);
+
+          const handleKeyDown = useCallback((e) => {
+            if (e.key === 'ArrowRight' || e.key === 'Space' || e.key === 'ArrowDown') {
+              nextSlide();
+            } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+              prevSlide();
+            }
+          }, [nextSlide, prevSlide]);
+
+          const handleWheel = useCallback((e) => {
+            if (isScrolling) return; 
+            
+            if (e.deltaY > 40) {
+              nextSlide();
+              setIsScrolling(true);
+              setTimeout(() => setIsScrolling(false), 800);
+            } else if (e.deltaY < -40) {
+              prevSlide();
+              setIsScrolling(true);
+              setTimeout(() => setIsScrolling(false), 800);
+            }
+          }, [isScrolling, nextSlide, prevSlide]);
+
+          const handleTouchStart = (e) => {
+            setTouchStart(e.touches[0].clientX);
+          };
+
+          const handleTouchEnd = (e) => {
+            const touchEnd = e.changedTouches[0].clientX;
+            if (touchStart - touchEnd > 50) {
+              nextSlide(); 
+            }
+            if (touchStart - touchEnd < -50) {
+              prevSlide(); 
+            }
+          };
+
+          useEffect(() => {
+            window.addEventListener('keydown', handleKeyDown);
+            window.addEventListener('wheel', handleWheel, { passive: false });
+            return () => {
+              window.removeEventListener('keydown', handleKeyDown);
+              window.removeEventListener('wheel', handleWheel);
+            };
+          }, [handleKeyDown, handleWheel]);
+
+          const goToSlide = (index) => {
+            setCurrentSlide(index);
+            setMobileMenuOpen(false);
+          };
+
+          return (
+            <div 
+              className="h-screen w-screen overflow-hidden bg-slate-950 text-slate-200 font-sans selection:bg-cyan-500/30 relative"
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
+            >
+              <style>{`
+                .glass-panel {
+                  background: rgba(30, 41, 59, 0.4);
+                  backdrop-filter: blur(12px);
+                  -webkit-backdrop-filter: blur(12px);
+                  border: 1px solid rgba(255, 255, 255, 0.05);
+                }
+                .text-glow { text-shadow: 0 0 20px rgba(34, 211, 238, 0.4); }
+                .bg-grid {
+                  background-image: linear-gradient(to right, rgba(255,255,255,0.02) 1px, transparent 1px),
+                                    linear-gradient(to bottom, rgba(255,255,255,0.02) 1px, transparent 1px);
+                  background-size: 40px 40px;
+                }
+                @keyframes float {
+                  0%, 100% { transform: translateY(0px); }
+                  50% { transform: translateY(-20px); }
+                }
+                .animate-float { animation: float 6s ease-in-out infinite; }
+                
+                .hide-scrollbar::-webkit-scrollbar { display: none; }
+                .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+              `}</style>
+
+              <nav className="fixed top-0 w-full z-50 glass-panel py-3 shadow-lg">
+                <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
+                  <div className="flex items-center gap-3 cursor-pointer" onClick={() => goToSlide(0)}>
+                    <img src="https://raw.githubusercontent.com/strongestrotiv/Jotgin/refs/heads/main/cb4513a3-8143-43c8-98ad-789ef3025e5f.jfif" alt="Logo Canivilu" className="w-10 h-10 rounded-full border border-cyan-500 object-cover" />
+                    <span className="text-xl font-bold tracking-wider text-white hidden sm:block">CANIVILU</span>
+                  </div>
+                  
+                  <div className="hidden md:flex items-center gap-6 lg:gap-8">
+                    <button onClick={() => goToSlide(1)} className={`text-sm font-medium transition-colors ${currentSlide === 1 ? 'text-cyan-400' : 'hover:text-cyan-400'}`}>O Problema</button>
+                    <button onClick={() => goToSlide(2)} className={`text-sm font-medium transition-colors ${currentSlide === 2 ? 'text-cyan-400' : 'hover:text-cyan-400'}`}>Professores</button>
+                    <button onClick={() => goToSlide(3)} className={`text-sm font-medium transition-colors ${currentSlide === 3 ? 'text-cyan-400' : 'hover:text-cyan-400'}`}>Marceneiros</button>
+                    <button onClick={() => goToSlide(4)} className={`text-sm font-medium transition-colors ${currentSlide === 4 ? 'text-purple-400' : 'hover:text-purple-400'}`}>BrainUpgrade</button>
+                    <button onClick={() => goToSlide(6)} className="px-5 py-2 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/50 hover:bg-cyan-500 hover:text-slate-900 font-bold transition-all">
+                      Ver Preços
+                    </button>
+                  </div>
+
+                  <button className="md:hidden text-white" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+                    {mobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
+                  </button>
+                </div>
+
+                {mobileMenuOpen && (
+                  <div className="md:hidden glass-panel absolute top-full left-0 w-full flex flex-col p-4 border-t border-white/10 shadow-2xl z-50">
+                    <button onClick={() => goToSlide(1)} className="py-3 text-left border-b border-white/5">O Problema</button>
+                    <button onClick={() => goToSlide(2)} className="py-3 text-left border-b border-white/5">Professores</button>
+                    <button onClick={() => goToSlide(3)} className="py-3 text-left border-b border-white/5">Marceneiros</button>
+                    <button onClick={() => goToSlide(4)} className="py-3 text-left border-b border-white/5 text-purple-300">BrainUpgrade</button>
+                    <button onClick={() => goToSlide(6)} className="py-3 text-left text-cyan-400 font-bold">Ver Preços</button>
+                  </div>
+                )}
+              </nav>
+
+              <div className="hidden md:flex fixed inset-y-0 left-4 lg:left-8 items-center z-40 pointer-events-none">
+                <button 
+                  onClick={prevSlide}
+                  disabled={currentSlide === 0}
+                  className="pointer-events-auto p-3 rounded-full glass-panel hover:bg-white/10 text-slate-300 hover:text-cyan-400 disabled:opacity-0 disabled:cursor-not-allowed transition-all shadow-[0_0_20px_rgba(0,0,0,0.5)] border-white/20 hover:scale-110"
+                >
+                  <ChevronLeft size={36} />
+                </button>
+              </div>
+              
+              <div className="hidden md:flex fixed inset-y-0 right-4 lg:right-8 items-center z-40 pointer-events-none">
+                <button 
+                  onClick={nextSlide}
+                  disabled={currentSlide === slides.length - 1}
+                  className="pointer-events-auto p-3 rounded-full glass-panel hover:bg-white/10 text-slate-300 hover:text-cyan-400 disabled:opacity-0 disabled:cursor-not-allowed transition-all shadow-[0_0_20px_rgba(0,0,0,0.5)] border-white/20 hover:scale-110"
+                >
+                  <ChevronRight size={36} />
+                </button>
+              </div>
+
+              <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex gap-2 md:gap-3 glass-panel px-4 py-2 md:px-6 md:py-3 rounded-full overflow-x-auto max-w-[80vw]">
+                {slides.map((_, index) => (
+                  <button 
+                    key={index} 
+                    onClick={() => goToSlide(index)}
+                    className={`w-2.5 h-2.5 md:w-3 md:h-3 shrink-0 rounded-full transition-all duration-300 ${index === currentSlide ? 'bg-cyan-400 scale-125 shadow-[0_0_10px_rgba(34,211,238,0.8)]' : 'bg-slate-600 hover:bg-slate-400'}`}
+                    aria-label={`Ir para o slide ${index + 1}`}
+                  />
+                ))}
+              </div>
+
+              <main className="h-full w-full relative">
+                {slides.map((slide, index) => (
+                  <div 
+                    key={slide.id}
+                    className={`absolute inset-0 h-full w-full transition-all duration-700 ease-in-out flex flex-col justify-center overflow-y-auto hide-scrollbar pt-20 pb-16
+                      ${index === currentSlide ? 'opacity-100 translate-x-0 z-10' : 
+                        index < currentSlide ? 'opacity-0 -translate-x-full z-0' : 'opacity-0 translate-x-full z-0'}`}
+                  >
+                    {slide.component}
+                  </div>
+                ))}
+              </main>
+            </div>
+          );
+        }
+
+        function SectionHero({ goToPrecos, goToSolucao }) {
+          return (
+            <section className="relative w-full min-h-full flex items-center bg-grid px-6 md:px-16">
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] md:w-[800px] md:h-[800px] bg-cyan-600/20 rounded-full blur-[120px] pointer-events-none"></div>
+              
+              <div className="max-w-7xl w-full mx-auto grid md:grid-cols-2 gap-8 lg:gap-12 items-center relative z-10">
+                <div className="text-center md:text-left">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-950/50 border border-cyan-800 text-cyan-400 text-sm font-bold tracking-wide mb-6 shadow-lg">
+                    <Zap size={16} /> LANÇAMENTO EXCLUSIVO
+                  </div>
+                  <h1 className="text-4xl sm:text-5xl lg:text-7xl font-black mb-6 leading-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-cyan-100 to-slate-400">
+                    Tech Chihuahua <span className="text-cyan-500 font-light text-glow block sm:inline">v1</span>
+                  </h1>
+                  <p className="text-base sm:text-lg lg:text-2xl text-slate-300 mb-8 leading-relaxed font-light">
+                    A ferramenta profissional disfarçada de pet adorável. Mais produtividade para o seu dia a dia, sem perder o fator fofura.
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+                    <button onClick={goToPrecos} className="px-8 py-4 rounded-full bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-lg transition-all shadow-[0_0_20px_rgba(34,211,238,0.4)] flex items-center justify-center gap-2 hover:scale-105">
+                      Fazer Reserva <ChevronRight size={20} />
+                    </button>
+                    <button onClick={goToSolucao} className="px-8 py-4 rounded-full border border-slate-600 hover:border-cyan-500 hover:text-cyan-400 font-bold text-lg transition-all glass-panel">
+                      Saber Mais
+                    </button>
+                  </div>
+                </div>
+                
+                <div className="flex justify-center md:justify-end mt-8 md:mt-0">
+                  <div className="relative w-56 h-56 lg:w-[400px] lg:h-[400px] animate-float">
+                    <div className="absolute inset-0 bg-gradient-to-tr from-cyan-500 to-blue-600 rounded-full blur-3xl opacity-40"></div>
+                    <img src="https://raw.githubusercontent.com/strongestrotiv/Jotgin/refs/heads/main/cb4513a3-8143-43c8-98ad-789ef3025e5f.jfif" alt="Tech Chihuahua" className="relative w-full h-full object-cover rounded-full border-4 border-cyan-500/50 shadow-2xl" />
+                  </div>
+                </div>
+              </div>
+            </section>
+          );
+        }
+
+        function SectionProblema() {
+          return (
+            <section className="w-full min-h-full flex flex-col justify-center bg-slate-900 relative px-6 md:px-16">
+              <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-red-600/10 rounded-full blur-[100px] pointer-events-none"></div>
+              <div className="max-w-6xl w-full mx-auto">
+                <div className="text-center mb-8 md:mb-12">
+                  <AlertTriangle className="text-red-500 mx-auto mb-4" size={40} />
+                  <h2 className="text-3xl md:text-5xl font-bold mb-4 text-white">O Problema Universal</h2>
+                  <p className="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto">Profissionais de excelência estão a perder a batalha contra o relógio.</p>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-8 relative items-center">
+                  <div className="glass-panel p-6 md:p-12 rounded-3xl border-t-4 border-t-red-500/50 flex flex-col text-left z-10 hover:shadow-[0_0_30px_rgba(239,68,68,0.15)] transition-shadow">
+                    <h3 className="text-xl md:text-2xl font-bold text-white mb-6">A Carga Invisível</h3>
+                    <ul className="space-y-4 md:space-y-6 text-slate-300">
+                      <li className="flex items-start gap-4"><Clock className="text-red-400 shrink-0 mt-1" size={24} /> <span className="text-base md:text-lg">Correções intermináveis ao fim de semana.</span></li>
+                      <li className="flex items-start gap-4"><Clock className="text-red-400 shrink-0 mt-1" size={24} /> <span className="text-base md:text-lg">Medições manuais lentas e com risco de erro.</span></li>
+                      <li className="flex items-start gap-4"><Clock className="text-red-400 shrink-0 mt-1" size={24} /> <span className="text-base md:text-lg">Tarefas repetitivas que roubam tempo à verdadeira arte.</span></li>
+                    </ul>
+                  </div>
+                  
+                  <div className="rounded-3xl overflow-hidden relative h-56 md:h-[400px] group border border-white/10 shadow-2xl">
+                    <img src="https://raw.githubusercontent.com/strongestrotiv/Jotgin/refs/heads/main/WhatsApp%20Image%202026-04-07%20at%2009.23.14%20(1).jpeg" alt="Cão exausto" className="w-full h-full object-cover grayscale-[50%] group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/50 to-transparent"></div>
+                    <div className="absolute bottom-6 left-6 right-6">
+                      <p className="text-red-400 font-bold text-lg md:text-xl tracking-widest text-shadow mb-1 md:mb-2">SOBRECARGA DETECTADA</p>
+                      <p className="text-slate-300 text-sm md:text-base hidden sm:block">Não se esconda dos problemas. Adote uma solução.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          );
+        }
+
+        function SectionProfessores() {
+          return (
+            <section className="w-full min-h-full flex flex-col justify-center relative overflow-hidden px-6 md:px-16">
+              <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[100px] pointer-events-none"></div>
+              <div className="max-w-6xl w-full mx-auto">
+                <div className="flex flex-col md:flex-row items-center gap-8 lg:gap-20">
+                  <div className="md:w-[45%] order-2 md:order-1 w-full max-w-sm mx-auto md:max-w-none">
+                    <div className="relative w-full aspect-square rounded-[40px] overflow-hidden border-2 border-blue-500/30 shadow-[0_0_50px_rgba(59,130,246,0.3)] group">
+                      <img src="https://raw.githubusercontent.com/strongestrotiv/Jotgin/refs/heads/main/WhatsApp%20Image%202026-04-07%20at%2009.23.14%20(2).jpeg" alt="Assistente" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-blue-950/90 via-blue-900/20 to-transparent mix-blend-overlay"></div>
+                      <div className="absolute bottom-6 left-0 w-full text-center">
+                        <span className="px-6 py-2 md:py-3 rounded-full glass-panel text-blue-300 font-bold tracking-widest text-xs md:text-sm shadow-xl border-blue-500/50">O ALUNO NOTA 10</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="md:w-[55%] order-1 md:order-2 text-left">
+                    <div className="flex items-center gap-4 mb-4 md:mb-6">
+                      <div className="p-2 md:p-3 rounded-xl bg-blue-500/20 text-blue-400"><GraduationCap size={28} className="md:w-9 md:h-9" /></div>
+                      <h2 className="text-3xl md:text-5xl font-bold text-white">Para Professores</h2>
+                    </div>
+                    <p className="text-base md:text-xl text-slate-300 mb-6 md:mb-10 leading-relaxed font-light hidden sm:block">
+                      O assistente de classe definitivo. Mais do que uma ferramenta técnica, é o mascote querido da sua turma que transforma o ambiente escolar.
+                    </p>
+                    
+                    <div className="space-y-4 md:space-y-8 glass-panel p-6 md:p-8 rounded-3xl border-white/5">
+                      <div className="flex gap-4 md:gap-5">
+                        <div className="mt-1 bg-blue-500/10 p-2 rounded-lg h-fit"><Eye className="text-blue-400" size={20} /></div>
+                        <div>
+                          <h4 className="text-white font-bold text-lg md:text-xl mb-1">Scanner Corretor 4K</h4>
+                          <p className="text-sm md:text-base text-slate-400">Digitaliza e corrige provas de escolha múltipla num piscar de olhos.</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-4 md:gap-5">
+                        <div className="mt-1 bg-blue-500/10 p-2 rounded-lg h-fit"><BookOpen className="text-blue-400" size={20} /></div>
+                        <div>
+                          <h4 className="text-white font-bold text-lg md:text-xl mb-1">Ditado Inteligente</h4>
+                          <p className="text-sm md:text-base text-slate-400">Reconhecimento de voz para avaliações diretamente no sistema da escola.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          );
+        }
+
+        function SectionMarceneiros() {
+          return (
+            <section className="w-full min-h-full flex flex-col justify-center bg-slate-900 relative overflow-hidden px-6 md:px-16">
+              <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-amber-600/10 rounded-full blur-[100px] pointer-events-none"></div>
+              <div className="max-w-6xl w-full mx-auto">
+                <div className="flex flex-col md:flex-row items-center gap-8 lg:gap-20">
+                  <div className="md:w-[55%] text-left">
+                    <div className="flex items-center gap-4 mb-4 md:mb-6">
+                      <div className="p-2 md:p-3 rounded-xl bg-amber-500/20 text-amber-400"><Hammer size={28} className="md:w-9 md:h-9" /></div>
+                      <h2 className="text-3xl md:text-5xl font-bold text-white">Para Marceneiros</h2>
+                    </div>
+                    <p className="text-base md:text-xl text-slate-300 mb-6 md:mb-10 leading-relaxed font-light hidden sm:block">
+                      O seu novo colega de oficina. Casca grossa e coração tech, concebido como um tanque para aguentar o trabalho mais pesado e sujo.
+                    </p>
+                    
+                    <div className="space-y-4 md:space-y-8 glass-panel p-6 md:p-8 rounded-3xl border-white/5">
+                      <div className="flex gap-4 md:gap-5">
+                        <div className="mt-1 bg-amber-500/10 p-2 rounded-lg h-fit"><Ruler className="text-amber-400" size={20} /></div>
+                        <div>
+                          <h4 className="text-white font-bold text-lg md:text-xl mb-1">Trena a Laser Ocular</h4>
+                          <p className="text-sm md:text-base text-slate-400">Medição milimétrica automática enviada para o seu telemóvel.</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-4 md:gap-5">
+                        <div className="mt-1 bg-amber-500/10 p-2 rounded-lg h-fit"><ShieldCheck className="text-amber-400" size={20} /></div>
+                        <div>
+                          <h4 className="text-white font-bold text-lg md:text-xl mb-1">Proteção IP68</h4>
+                          <p className="text-sm md:text-base text-slate-400">Resistente a quedas até 2 metros, pó de serra e líquidos industriais.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="md:w-[45%] w-full flex justify-center mt-4 md:mt-0">
+                    <div className="relative w-56 h-56 lg:w-[400px] lg:h-[400px] rounded-full overflow-hidden border-4 border-amber-500/40 shadow-[0_0_60px_rgba(245,158,11,0.25)] group">
+                      <img src="https://raw.githubusercontent.com/strongestrotiv/Jotgin/refs/heads/main/WhatsApp%20Image%202026-04-07%20at%2009.23.13.jpeg" alt="Oficina" className="w-full h-full object-cover grayscale-[30%] group-hover:grayscale-0 transition-all duration-700 scale-105" />
+                      <div className="absolute inset-0 bg-amber-950/40 mix-blend-multiply"></div>
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-sm bg-black/30">
+                        <div className="glass-panel px-4 md:px-6 py-2 md:py-3 rounded-full border-amber-500/80 shadow-2xl">
+                          <span className="text-amber-400 font-bold tracking-widest flex items-center gap-2 text-sm md:text-lg"><ShieldCheck size={20} /> MODO GUARDA</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          );
+        }
+
+        function SectionBrainUpgrade() {
+          return (
+            <section className="w-full min-h-full flex flex-col justify-center relative overflow-hidden bg-gradient-to-b from-slate-950 to-purple-950/20 px-6 md:px-16">
+              <div className="max-w-6xl w-full mx-auto text-center">
+                <div className="inline-flex items-center gap-2 px-3 py-1 md:px-4 md:py-1.5 rounded-full glass-panel border-purple-500/30 text-purple-400 text-xs md:text-sm font-bold tracking-widest mb-4 md:mb-6">
+                  <LinkIcon size={14} /> NOVIDADE EXCLUSIVA
+                </div>
+                <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-8 md:mb-12 text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-pink-500">
+                  Já tem um Chihuahua?
+                </h2>
+
+                <div className="glass-panel p-6 md:p-12 rounded-3xl md:rounded-[40px] border-purple-500/20 flex flex-col md:flex-row items-center gap-8 md:gap-12 text-left relative overflow-hidden">
+                  <div className="absolute -right-20 -bottom-20 w-80 h-80 bg-purple-600/20 rounded-full blur-3xl pointer-events-none"></div>
+                  
+                  <div className="md:w-1/3 flex justify-center">
+                    <div className="w-48 h-48 md:w-64 md:h-64 rounded-full border-2 border-purple-400 border-dashed p-2 relative group animate-[spin_10s_linear_infinite] shadow-[0_0_40px_rgba(168,85,247,0.3)]">
+                       <div className="w-full h-full rounded-full overflow-hidden bg-slate-900 relative animate-[spin_10s_linear_infinite_reverse]">
+                         <img src="https://raw.githubusercontent.com/strongestrotiv/Jotgin/refs/heads/main/WhatsApp%20Image%202026-04-07%20at%2009.23.14.jpeg" alt="Pet Upgrade" className="w-full h-full object-cover scale-110" />
+                         <div className="absolute inset-0 bg-purple-900/70 flex items-center justify-center flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-md pointer-events-none">
+                           <Wifi className="text-purple-300 animate-pulse" size={32} />
+                           <span className="font-bold text-white text-xs tracking-widest bg-black/70 px-3 py-1 rounded-full mt-2">INSTALANDO...</span>
+                         </div>
+                       </div>
+                    </div>
+                  </div>
+                  
+                  <div className="md:w-2/3 relative z-10 text-center md:text-left">
+                    <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-3 md:mb-4 text-white">Coleira <span className="text-purple-400">BrainUpgrade</span></h3>
+                    <p className="text-base md:text-xl text-slate-300 leading-relaxed mb-6 md:mb-8 font-light">
+                      Não precisa de um robô novo se já tem o melhor amigo em casa. A nossa coleira smart adapta a tecnologia do Tech Chihuahua ao seu pet.
+                    </p>
+                    
+                    <div className="grid sm:grid-cols-2 gap-4 md:gap-6">
+                      <div className="glass-panel p-4 md:p-6 rounded-2xl border-purple-500/20 hover:bg-purple-900/20 transition-colors text-left">
+                        <h4 className="font-bold text-purple-300 mb-1 md:mb-2 flex items-center gap-2 text-base md:text-lg"><Wifi size={18}/> Tradutor App</h4>
+                        <p className="text-xs md:text-sm text-slate-400">Converte latidos e comportamentos em notificações no smartphone.</p>
+                      </div>
+                      <div className="glass-panel p-4 md:p-6 rounded-2xl border-purple-500/20 hover:bg-purple-900/20 transition-colors text-left">
+                        <h4 className="font-bold text-purple-300 mb-1 md:mb-2 flex items-center gap-2 text-base md:text-lg"><Cpu size={18}/> Monitor de Saúde</h4>
+                        <p className="text-xs md:text-sm text-slate-400">Acompanha os sinais vitais e níveis de atividade do seu companheiro.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          );
+        }
+
+        function SectionSpecs() {
+          return (
+            <section className="w-full min-h-full flex flex-col justify-center bg-slate-900 relative px-6 md:px-16">
+              <div className="max-w-7xl w-full mx-auto">
+                <div className="text-center mb-8 md:mb-12">
+                  <h2 className="text-3xl md:text-5xl font-bold text-white mb-3 md:mb-4">Especificações Técnicas</h2>
+                  <p className="text-base md:text-xl text-slate-400 hidden sm:block">Poder de processamento incansável num chassi compacto.</p>
+                </div>
+
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+                  <div className="glass-panel p-5 md:p-8 rounded-2xl md:rounded-3xl border-cyan-500/10 hover:border-cyan-500/40 transition-all md:hover:-translate-y-2 text-center md:text-left">
+                    <Cpu className="text-cyan-400 mb-3 md:mb-6 mx-auto md:mx-0" size={36} />
+                    <h4 className="text-base md:text-xl font-bold text-white mb-2">IA Neural Bionic</h4>
+                    <p className="text-xs md:text-sm text-slate-400">Aprendizagem automática local para respostas em milissegundos.</p>
+                  </div>
+                  
+                  <div className="glass-panel p-5 md:p-8 rounded-2xl md:rounded-3xl border-cyan-500/10 hover:border-cyan-500/40 transition-all md:hover:-translate-y-2 relative overflow-hidden group text-center md:text-left">
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-500 mix-blend-luminosity z-0">
+                      <img src="https://raw.githubusercontent.com/strongestrotiv/Jotgin/refs/heads/main/WhatsApp%20Image%202026-04-07%20at%2009.23.14%20(3).jpeg" alt="Recarga" className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"></div>
+                    </div>
+                    <div className="relative z-10">
+                      <BatteryCharging className="text-cyan-400 mb-3 md:mb-6 mx-auto md:mx-0" size={36} />
+                      <h4 className="text-base md:text-xl font-bold text-white mb-2">Autonomia 48h</h4>
+                      <p className="text-xs md:text-sm text-slate-400">Opera continuamente. Retorna sozinho à base magnética.</p>
+                    </div>
+                  </div>
+
+                  <div className="glass-panel p-5 md:p-8 rounded-2xl md:rounded-3xl border-cyan-500/10 hover:border-cyan-500/40 transition-all md:hover:-translate-y-2 text-center md:text-left">
+                    <Eye className="text-cyan-400 mb-3 md:mb-6 mx-auto md:mx-0" size={36} />
+                    <h4 className="text-base md:text-xl font-bold text-white mb-2">Sensores LIDAR</h4>
+                    <p className="text-xs md:text-sm text-slate-400">Mapeamento 3D perfeito do ambiente e obstáculos.</p>
+                  </div>
+
+                  <div className="glass-panel p-5 md:p-8 rounded-2xl md:rounded-3xl border-cyan-500/10 hover:border-cyan-500/40 transition-all md:hover:-translate-y-2 text-center md:text-left">
+                    <Wifi className="text-cyan-400 mb-3 md:mb-6 mx-auto md:mx-0" size={36} />
+                    <h4 className="text-base md:text-xl font-bold text-white mb-2">Conectividade</h4>
+                    <p className="text-xs md:text-sm text-slate-400">Módulo Wi-Fi 6E, Bluetooth 5.3 e 5G integrado.</p>
+                  </div>
+                </div>
+              </div>
+            </section>
+          );
+        }
+
+        function SectionPrecos() {
+          return (
+            <section className="w-full min-h-full flex flex-col justify-center relative bg-grid px-6 md:px-16 pt-8 overflow-y-auto hide-scrollbar">
+              <div className="max-w-7xl w-full mx-auto my-auto">
+                <div className="text-center mb-8 md:mb-12">
+                  <h2 className="text-3xl md:text-5xl font-bold text-white mb-2 md:mb-4">Planos Simples</h2>
+                  <p className="text-sm md:text-xl text-slate-400">Uma ferramenta que se paga sozinha.</p>
+                </div>
+
+                <div className="grid md:grid-cols-3 gap-6 lg:gap-8 items-center max-w-6xl mx-auto pb-10 md:pb-0">
+                  
+                  <div className="glass-panel rounded-3xl p-6 md:p-8 border-t-4 border-t-purple-500 bg-slate-900/90 md:hover:-translate-y-2 transition-transform">
+                    <h3 className="text-xl md:text-2xl font-bold text-white mb-1">Coleira Smart</h3>
+                    <p className="text-slate-400 text-xs md:text-sm mb-4 md:mb-6 h-auto md:h-10">Para o seu pet atual.</p>
+                    <div className="mb-4 md:mb-6">
+                      <span className="text-3xl md:text-4xl font-black text-purple-400">R$ 299</span>
+                      <p className="text-xs md:text-sm text-slate-500 mt-1">ou 12x de R$ 28,90</p>
+                    </div>
+                    <ul className="space-y-2 md:space-y-3 mb-6 md:mb-8">
+                      <li className="flex items-center gap-2 text-xs md:text-sm text-slate-300"><CheckCircle size={16} className="text-purple-400"/> Tradução de latidos</li>
+                      <li className="flex items-center gap-2 text-xs md:text-sm text-slate-300"><CheckCircle size={16} className="text-purple-400"/> Monitor de saúde</li>
+                    </ul>
+                    <button className="w-full py-2 md:py-3 rounded-xl font-bold bg-purple-500/20 text-purple-400 hover:bg-purple-500 hover:text-white transition-colors">Comprar Coleira</button>
+                  </div>
+
+                  <div className="glass-panel bg-slate-900/95 rounded-3xl p-8 md:p-10 border border-cyan-500/50 shadow-[0_0_40px_rgba(34,211,238,0.2)] relative md:scale-110 z-10">
+                    <div className="absolute -top-3 md:-top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-blue-600 to-cyan-500 px-3 md:px-4 py-1 rounded-full text-[10px] md:text-xs font-bold text-white tracking-widest whitespace-nowrap shadow-lg">
+                      MAIS POPULAR
+                    </div>
+                    <h3 className="text-2xl md:text-3xl font-bold text-white mb-1 text-center">Edu Edition</h3>
+                    <p className="text-slate-400 text-xs md:text-sm mb-4 md:mb-6 h-auto md:h-10 text-center">Assistente para a sala de aula.</p>
+                    <div className="mb-4 md:mb-6 text-center glass-panel bg-black/40 py-3 md:py-4 rounded-2xl border-white/5">
+                      <span className="text-4xl md:text-5xl font-black text-cyan-400">R$ 899</span>
+                      <p className="text-xs md:text-sm text-slate-400 mt-1">ou 12x de R$ 85,90</p>
+                    </div>
+                    <ul className="space-y-3 md:space-y-4 mb-6 md:mb-8">
+                      <li className="flex items-center gap-2 text-sm md:text-base text-slate-200"><CheckCircle size={18} className="text-cyan-400"/> Scanner de Provas 4K</li>
+                      <li className="flex items-center gap-2 text-sm md:text-base text-slate-200"><CheckCircle size={18} className="text-cyan-400"/> Gestão Escolar</li>
+                      <li className="flex items-center gap-2 text-sm md:text-base text-slate-200"><CheckCircle size={18} className="text-cyan-400"/> Módulo Ludo-terapia</li>
+                    </ul>
+                    <button className="w-full py-3 md:py-4 rounded-xl font-bold bg-cyan-500 text-slate-900 hover:bg-cyan-400 shadow-[0_0_20px_rgba(34,211,238,0.3)] transition-all md:hover:scale-105">Reservar Edu</button>
+                  </div>
+
+                  <div className="glass-panel rounded-3xl p-6 md:p-8 border-t-4 border-t-amber-500 bg-slate-900/90 md:hover:-translate-y-2 transition-transform">
+                    <h3 className="text-xl md:text-2xl font-bold text-white mb-1">Maker Edition</h3>
+                    <p className="text-slate-400 text-xs md:text-sm mb-4 md:mb-6 h-auto md:h-10">Robusta para a oficina.</p>
+                    <div className="mb-4 md:mb-6">
+                      <span className="text-3xl md:text-4xl font-black text-amber-400">R$ 1.199</span>
+                      <p className="text-xs md:text-sm text-slate-500 mt-1">ou 12x de R$ 114,90</p>
+                    </div>
+                    <ul className="space-y-2 md:space-y-3 mb-6 md:mb-8">
+                      <li className="flex items-center gap-2 text-xs md:text-sm text-slate-300"><CheckCircle size={16} className="text-amber-500"/> Resistente IP68</li>
+                      <li className="flex items-center gap-2 text-xs md:text-sm text-slate-300"><CheckCircle size={16} className="text-amber-500"/> Trena Laser e Projeção</li>
+                    </ul>
+                    <button className="w-full py-2 md:py-3 rounded-xl font-bold bg-amber-500/20 text-amber-400 hover:bg-amber-500 hover:text-white transition-colors">Reservar Maker</button>
+                  </div>
+
+                </div>
+              </div>
+            </section>
+          );
+        }
+
+        function SectionFooter() {
+          return (
+            <section className="w-full min-h-full flex flex-col items-center justify-center bg-slate-950 px-6 md:px-16 relative">
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] md:w-[600px] md:h-[600px] bg-cyan-900/10 rounded-full blur-[100px] pointer-events-none"></div>
+              
+              <div className="text-center z-10 glass-panel p-8 md:p-20 rounded-3xl md:rounded-[40px] border-white/5 max-w-4xl mx-auto shadow-2xl">
+                <div className="mb-6 md:mb-8 flex justify-center">
+                   <img src="https://raw.githubusercontent.com/strongestrotiv/Jotgin/refs/heads/main/cb4513a3-8143-43c8-98ad-789ef3025e5f.jfif" alt="Logo Canivilu" className="w-20 h-20 md:w-24 md:h-24 rounded-full border-2 border-cyan-500 object-cover shadow-[0_0_30px_rgba(34,211,238,0.3)] animate-float" />
+                </div>
+                <h2 className="text-3xl md:text-6xl font-black text-white mb-4 md:mb-6">Pronto para a evolução?</h2>
+                <p className="text-base md:text-xl text-slate-400 mb-8 md:mb-10 max-w-2xl mx-auto font-light">
+                  Tecnologia avançada disfarçada do seu melhor amigo. O primeiro lote do Tech Chihuahua chega no próximo mês.
+                </p>
+                
+                <div className="flex flex-col sm:flex-row justify-center items-center gap-4 md:gap-6 mb-10 md:mb-16">
+                  <button className="px-8 py-4 md:px-10 md:py-5 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold text-lg md:text-xl transition-all shadow-[0_0_30px_rgba(34,211,238,0.4)] md:hover:scale-105">
+                    Falar com a Equipa
+                  </button>
+                </div>
+
+                <div className="flex flex-col md:flex-row justify-center items-center gap-3 md:gap-6 text-xs md:text-sm text-slate-500 border-t border-white/10 pt-6 md:pt-8">
+                  <span className="hover:text-cyan-400 cursor-pointer transition-colors">Termos de Serviço</span>
+                  <span className="hidden md:inline">•</span>
+                  <span className="hover:text-cyan-400 cursor-pointer transition-colors">Política de Privacidade</span>
+                  <span className="hidden md:inline">•</span>
+                  <span className="hover:text-cyan-400 cursor-pointer transition-colors text-glow">contacto@canivilu.com.br</span>
+                </div>
+                <div className="mt-4 md:mt-6 text-[10px] md:text-xs text-slate-700 font-mono">
+                  &copy; {new Date().getFullYear()} Canivilu Technologies v1.0
+                </div>
+              </div>
+            </section>
+          );
+        }
+
+        const root = createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
